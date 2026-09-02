@@ -1,0 +1,153 @@
+{
+  "name": "devxray",
+  "displayName": "DevXray",
+  "description": "AI-powered codebase health and intelligence for VS Code. Explore, analyze, and understand your project.",
+  "version": "0.1.0",
+  "publisher": "saswat",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Programming Languages",
+    "Visualization"
+  ],
+  "keywords": [
+    "code analysis",
+    "dependency graph",
+    "dead code",
+    "performance",
+    "codebase explorer"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "devxray.analyzeProject",
+        "title": "Analyze Project",
+        "category": "DevXray",
+        "icon": "$(search)"
+      },
+      {
+        "command": "devxray.analyzeFile",
+        "title": "Analyze Current File",
+        "category": "DevXray",
+        "icon": "$(file-code)"
+      },
+      {
+        "command": "devxray.scanDependencies",
+        "title": "Scan Dependencies",
+        "category": "DevXray",
+        "icon": "$(package)"
+      },
+      {
+        "command": "devxray.openDashboard",
+        "title": "Open Dashboard",
+        "category": "DevXray",
+        "icon": "$(dashboard)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "devxray-sidebar",
+          "title": "DevXray",
+          "icon": "$(telescope)"
+        }
+      ]
+    },
+    "views": {
+      "devxray-sidebar": [
+        {
+          "type": "webview",
+          "id": "devxray.sidebarView",
+          "name": "DevXray",
+          "icon": "$(telescope)",
+          "contextualTitle": "DevXray"
+        }
+      ]
+    },
+    "menus": {
+      "commandPalette": [
+        { "command": "devxray.analyzeProject" },
+        { "command": "devxray.analyzeFile" },
+        { "command": "devxray.scanDependencies" },
+        { "command": "devxray.openDashboard" }
+      ],
+      "editor/context": [
+        {
+          "command": "devxray.analyzeFile",
+          "when": "editorIsOpen",
+          "group": "devxray"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "DevXray",
+      "properties": {
+        "devxray.excludePatterns": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [
+            "**/node_modules/**",
+            "**/dist/**",
+            "**/out/**",
+            "**/.git/**",
+            "**/coverage/**"
+          ],
+          "description": "Glob patterns for files/folders to exclude from analysis."
+        },
+        "devxray.maxFileSizeKb": {
+          "type": "number",
+          "default": 500,
+          "minimum": 10,
+          "maximum": 10000,
+          "description": "Maximum file size (in KB) to include in analysis."
+        },
+        "devxray.enablePerformanceAnalysis": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable static performance analysis."
+        },
+        "devxray.enableDeadCodeDetection": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable dead code detection."
+        },
+        "devxray.logLevel": {
+          "type": "string",
+          "enum": ["debug", "info", "warn", "error"],
+          "default": "info",
+          "description": "Log level for the DevXray output channel."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "lint:fix": "eslint src --ext ts --fix",
+    "pretest": "npm run compile && npm run lint",
+    "test": "node ./out/test/runTest.js",
+    "reinstall": "npm run compile && vsce package --allow-missing-repository --baseContentUrl https://github.com/saswat/devxray --out devxray-latest.vsix && code --install-extension devxray-latest.vsix"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vscode/test-electron": "^2.3.0",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "@vscode/codicons": "^0.0.46-24",
+    "typescript": "^5.4.0"
+  }
+}
