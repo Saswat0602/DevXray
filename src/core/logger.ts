@@ -73,6 +73,7 @@ export class Logger {
 
     // Mirror errors to console in development (VS Code Extension Development Host)
     if (level === 'error') {
+      // eslint-disable-next-line no-console
       console.error(line);
     }
   }

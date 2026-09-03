@@ -80,3 +80,32 @@ export interface SerializedCodebaseGraph {
   scannedAt: string;   // ISO 8601
   fileCount: number;
 }
+
+/**
+ * Converts a CodebaseGraph to a JSON-safe SerializedCodebaseGraph for webview postMessage.
+ */
+export function serializeGraph(
+  graph: import('./Dependency').CodebaseGraph,
+): SerializedCodebaseGraph {
+  return {
+    entities: Array.from(graph.entities.values()).map((e) => ({
+      id: e.id,
+      name: e.name,
+      kind: e.kind,
+      filePath: e.filePath,
+      startLine: e.startLine,
+      endLine: e.endLine,
+      isExported: e.isExported,
+    })),
+    edges: graph.edges.map((edge) => ({
+      from: edge.from,
+      to: edge.to,
+      kind: edge.kind,
+      filePath: edge.filePath,
+      line: edge.line,
+    })),
+    scannedAt: graph.scannedAt.toISOString(),
+    fileCount: graph.fileCount,
+  };
+}
+

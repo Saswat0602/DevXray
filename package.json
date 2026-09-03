@@ -135,6 +135,7 @@
     "lint:fix": "eslint src --ext ts --fix",
     "pretest": "npm run compile && npm run lint",
     "test": "node ./out/test/runTest.js",
+    "test:unit": "npm run compile && node ./out/test/runUnitTests.js",
     "reinstall": "npm run compile && vsce package --allow-missing-repository --baseContentUrl https://github.com/saswat/devxray --out devxray-latest.vsix && code --install-extension devxray-latest.vsix"
   },
   "devDependencies": {

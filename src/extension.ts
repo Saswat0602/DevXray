@@ -18,6 +18,8 @@ import { registerAnalyzeProjectCommand } from './commands/analyzeProject';
 import { registerAnalyzeFileCommand } from './commands/analyzeFile';
 import { registerScanDependenciesCommand } from './commands/scanDependencies';
 
+import { GraphStore } from './core/graphStore';
+
 // ── Extension lifecycle ──────────────────────────────────────────────────────
 
 /**
@@ -33,14 +35,17 @@ export function activate(context: vscode.ExtensionContext): void {
   Logger.initialize(outputChannel, logLevel);
   context.subscriptions.push({ dispose: () => Logger.dispose() });
 
+  const packageInfo = context.extension.packageJSON as { version?: string } | undefined;
   Logger.info('extension', 'DevXray activating…', {
-    version: context.extension.packageJSON.version as string,
+    version: packageInfo?.version ?? '0.1.0',
   });
 
-  // ── 2. Instantiate providers ─────────────────────────────────────────────
+  // ── 2. Instantiate core services & providers ────────────────────────────
+  const graphStore = new GraphStore();
   const sidebarProvider = new SidebarProvider(context.extensionUri);
 
   // ── 3. Register services in Registry ────────────────────────────────────
+  Registry.register(GraphStore, graphStore);
   Registry.register(SidebarProvider, sidebarProvider);
 
   // ── 4. Register VS Code contribution points ──────────────────────────────

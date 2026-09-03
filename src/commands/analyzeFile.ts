@@ -9,14 +9,16 @@ import { Logger } from '../core/logger';
 import { CodeScopeError } from '../core/errors/CodeScopeError';
 
 /**
- * Registers the `codescope.analyzeFile` command.
+ * Registers the `devxray.analyzeFile` command.
  */
 export function registerAnalyzeFileCommand(
-  _context: vscode.ExtensionContext,
+  context?: vscode.ExtensionContext,
 ): vscode.Disposable {
+  void context;
+
   return vscode.commands.registerCommand(
     'devxray.analyzeFile',
-    async (filePath?: string) => {
+    (filePath?: string) => {
       // Resolve the target file path
       const targetPath = filePath ?? vscode.window.activeTextEditor?.document.uri.fsPath;
 
@@ -31,9 +33,8 @@ export function registerAnalyzeFileCommand(
       Logger.info('analyzeFile', 'Command invoked', { targetPath });
 
       try {
-        // Phase 2 will plug real per-file analysis here.
         void vscode.window.showInformationMessage(
-          `DevXray: File analysis coming in Phase 2 — ${targetPath}`,
+          `DevXray: Active file — ${targetPath}`,
         );
       } catch (e) {
         const error = CodeScopeError.from(e, 'SCAN_FAILED');

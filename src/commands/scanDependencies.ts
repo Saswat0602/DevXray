@@ -9,12 +9,14 @@ import { Logger } from '../core/logger';
 import { CodeScopeError } from '../core/errors/CodeScopeError';
 
 /**
- * Registers the `codescope.scanDependencies` command.
+ * Registers the `devxray.scanDependencies` command.
  */
 export function registerScanDependenciesCommand(
-  _context: vscode.ExtensionContext,
+  context?: vscode.ExtensionContext,
 ): vscode.Disposable {
-  return vscode.commands.registerCommand('devxray.scanDependencies', async () => {
+  void context;
+
+  return vscode.commands.registerCommand('devxray.scanDependencies', () => {
     Logger.info('scanDependencies', 'Command invoked');
 
     const workspaceFolders = vscode.workspace.workspaceFolders;
