@@ -17,8 +17,11 @@ import { SidebarProvider } from './providers/SidebarProvider';
 import { registerAnalyzeProjectCommand } from './commands/analyzeProject';
 import { registerAnalyzeFileCommand } from './commands/analyzeFile';
 import { registerScanDependenciesCommand } from './commands/scanDependencies';
+import { registerOpenEntityCommand } from './commands/openEntity';
+import { registerShowEntityDetailsCommand } from './commands/showEntityDetails';
 
 import { GraphStore } from './core/graphStore';
+import { CodebaseTreeProvider } from './providers/CodebaseTreeProvider';
 
 // ── Extension lifecycle ──────────────────────────────────────────────────────
 
@@ -70,6 +73,14 @@ export function activate(context: vscode.ExtensionContext): void {
     registerAnalyzeProjectCommand(context),
     registerAnalyzeFileCommand(context),
     registerScanDependenciesCommand(context),
+    registerOpenEntityCommand(context),
+    registerShowEntityDetailsCommand(context)
+  );
+
+  // Tree View
+  const codebaseTreeProvider = new CodebaseTreeProvider();
+  context.subscriptions.push(
+    vscode.window.registerTreeDataProvider('devxray.codebaseTree', codebaseTreeProvider)
   );
 
   Logger.info('extension', 'DevXray activated successfully');

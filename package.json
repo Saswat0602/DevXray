@@ -49,6 +49,17 @@
         "title": "Open Dashboard",
         "category": "DevXray",
         "icon": "$(dashboard)"
+      },
+      {
+        "command": "devxray.openEntity",
+        "title": "Open Entity",
+        "category": "DevXray"
+      },
+      {
+        "command": "devxray.showEntityDetails",
+        "title": "Show Details",
+        "category": "DevXray",
+        "icon": "$(info)"
       }
     ],
     "viewsContainers": {
@@ -65,9 +76,15 @@
         {
           "type": "webview",
           "id": "devxray.sidebarView",
-          "name": "DevXray",
+          "name": "DevXray Dashboard",
           "icon": "$(telescope)",
           "contextualTitle": "DevXray"
+        },
+        {
+          "id": "devxray.codebaseTree",
+          "name": "Codebase Explorer",
+          "icon": "$(type-hierarchy)",
+          "contextualTitle": "Codebase Explorer"
         }
       ]
     },
@@ -82,6 +99,18 @@
         {
           "command": "devxray.analyzeFile",
           "when": "editorIsOpen",
+          "group": "devxray"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "devxray.showEntityDetails",
+          "when": "view == devxray.codebaseTree && viewItem == devxrayEntity",
+          "group": "inline"
+        },
+        {
+          "command": "devxray.showEntityDetails",
+          "when": "view == devxray.codebaseTree && viewItem == devxrayEntity",
           "group": "devxray"
         }
       ]
