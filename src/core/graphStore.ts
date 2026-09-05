@@ -4,8 +4,11 @@
 // Singleton service managed via Registry.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import * as vscode from 'vscode';
 import { CodebaseGraph, DependencyEdge } from './types/Dependency';
 import { CodeEntity } from './types/CodeEntity';
+import { FileIndexResult } from './types/FileIndexData';
+import { DependencyGraphBuilder } from '../analyzer/codebase/dependencyGraph';
 
 export type GraphChangeListener = (graph: CodebaseGraph | undefined) => void;
 
@@ -15,6 +18,7 @@ export type GraphChangeListener = (graph: CodebaseGraph | undefined) => void;
 export class GraphStore {
   private _graph: CodebaseGraph | undefined;
   private readonly _listeners = new Set<GraphChangeListener>();
+  private _indexResults = new Map<string, FileIndexResult>();
 
   // Cached index mappings for O(1) edge lookups
   private _inboundEdges = new Map<string, DependencyEdge[]>();
@@ -31,6 +35,45 @@ export class GraphStore {
     this._graph = graph;
     this._rebuildIndices(graph);
     this._notifyListeners();
+  }
+
+  public setIndexResults(results: FileIndexResult[]): void {
+    this._indexResults.clear();
+    for (const r of results) {
+      this._indexResults.set(r.filePath, r);
+    }
+    this._rebuildGraph();
+  }
+
+  public updateFile(result: FileIndexResult): void {
+    this._indexResults.set(result.filePath, result);
+    this._rebuildGraph();
+  }
+
+  public removeFile(filePath: string): void {
+    this._indexResults.delete(filePath);
+    this._rebuildGraph();
+  }
+
+  private _rebuildGraph(): void {
+    const result = DependencyGraphBuilder.build(Array.from(this._indexResults.values()));
+    if (result.ok) {
+      this.setGraph(result.data);
+    }
+  }
+
+  public async saveToStorage(context: vscode.ExtensionContext): Promise<void> {
+    const results = Array.from(this._indexResults.values());
+    await context.workspaceState.update('devxray.indexResults', results);
+  }
+
+  public loadFromStorage(context: vscode.ExtensionContext): boolean {
+    const results = context.workspaceState.get<FileIndexResult[]>('devxray.indexResults');
+    if (results && results.length > 0) {
+      this.setIndexResults(results);
+      return true;
+    }
+    return false;
   }
 
   /** Get an entity by ID */
@@ -62,6 +105,7 @@ export class GraphStore {
   /** Clear the stored graph */
   public clear(): void {
     this._graph = undefined;
+    this._indexResults.clear();
     this._inboundEdges.clear();
     this._outboundEdges.clear();
     this._fileToEntities.clear();

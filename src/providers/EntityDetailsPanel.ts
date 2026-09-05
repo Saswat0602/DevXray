@@ -4,7 +4,10 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import * as vscode from 'vscode';
-import { EntityDetailsData } from '../core/types/EntityDetailsData';
+import { EntityDetailsData, EntityEdgeDetails } from '../core/types/EntityDetailsData';
+import { DependencyEdge } from '../core/types/Dependency';
+import { Registry } from '../core/registry';
+import { GraphStore } from '../core/graphStore';
 
 export class EntityDetailsPanel {
   public static currentPanel: EntityDetailsPanel | undefined;
@@ -12,6 +15,7 @@ export class EntityDetailsPanel {
 
   private readonly _panel: vscode.WebviewPanel;
   private _disposables: vscode.Disposable[] = [];
+  private _currentData: EntityDetailsData | undefined;
 
   public static createOrShow(extensionUri: vscode.Uri, data: EntityDetailsData): void {
     const column = vscode.window.activeTextEditor
@@ -61,9 +65,51 @@ export class EntityDetailsPanel {
       null,
       this._disposables
     );
+
+    const graphStore = Registry.has(GraphStore) ? Registry.get(GraphStore) : undefined;
+    if (graphStore) {
+      this._disposables.push(
+        new vscode.Disposable(
+          graphStore.onDidChangeGraph(() => {
+            this._refreshData(graphStore);
+          })
+        )
+      );
+    }
+  }
+
+  private _refreshData(graphStore: GraphStore): void {
+    if (!this._currentData) return;
+    
+    const targetId = this._currentData.targetEntity.id;
+    const targetEntity = graphStore.getEntity(targetId);
+    
+    if (!targetEntity) {
+      // Entity was deleted, close the panel
+      this._panel.dispose();
+      return;
+    }
+
+    const rawInbound = graphStore.getInboundEdges(targetId);
+    const rawOutbound = graphStore.getOutboundEdges(targetId);
+
+    const mapEdge = (edge: DependencyEdge, isOutbound: boolean): EntityEdgeDetails => {
+      const otherId = isOutbound ? edge.to : edge.from;
+      const otherEntity = graphStore.getEntity(otherId);
+      return { edge, targetEntity: otherEntity };
+    };
+
+    const newData: EntityDetailsData = {
+      targetEntity,
+      inboundEdges: rawInbound.map(e => mapEdge(e, false)),
+      outboundEdges: rawOutbound.map(e => mapEdge(e, true)),
+    };
+
+    this.update(newData);
   }
 
   public update(data: EntityDetailsData): void {
+    this._currentData = data;
     this._panel.title = `Details: ${data.targetEntity.name}`;
     this._panel.webview.html = this._getHtmlForWebview(this._panel.webview, data);
   }

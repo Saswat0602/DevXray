@@ -9,7 +9,7 @@ import { Registry } from '../core/registry';
 import { GraphStore } from '../core/graphStore';
 import { CodeEntity, CodeEntityKind } from '../core/types/CodeEntity';
 
-type TreeNodeType = 'file' | 'entity';
+type TreeNodeType = 'folder' | 'file' | 'entity';
 
 export class EntityTreeNode extends vscode.TreeItem {
   constructor(
@@ -23,22 +23,26 @@ export class EntityTreeNode extends vscode.TreeItem {
   ) {
     super(label, collapsibleState);
     
-    this.contextValue = type === 'file' ? 'devxrayFile' : 'devxrayEntity';
-    this.tooltip = type === 'file' ? filePath : `${label} (${entity?.kind})`;
+    this.contextValue = type === 'folder' ? 'devxrayFolder' : type === 'file' ? 'devxrayFile' : 'devxrayEntity';
+    this.tooltip = type === 'folder' || type === 'file' ? filePath : `${label} (${entity?.kind})`;
     
     // Icon based on kind
-    if (type === 'file') {
+    if (type === 'folder') {
+      this.iconPath = new vscode.ThemeIcon('folder');
+    } else if (type === 'file') {
       this.iconPath = new vscode.ThemeIcon('file-code');
     } else if (entity) {
       this.iconPath = this._getIconForKind(entity.kind);
     }
 
-    // Command to open the entity
-    this.command = {
-      command: 'devxray.openEntity',
-      title: 'Open',
-      arguments: [this.filePath, this.startLine],
-    };
+    // Command to open the entity (only for files and entities)
+    if (type !== 'folder') {
+      this.command = {
+        command: 'devxray.openEntity',
+        title: 'Open',
+        arguments: [this.filePath, this.startLine],
+      };
+    }
   }
 
   private _getIconForKind(kind: CodeEntityKind): vscode.ThemeIcon {
@@ -100,43 +104,54 @@ export class CodebaseTreeProvider implements vscode.TreeDataProvider<EntityTreeN
       return [];
     }
 
-    if (!element) {
-      // Root level: Group by file
-      // Since it's a simple list, we will just return all unique files
-      // To improve UX, we could group by folder later, but flat list of files is fine for Phase 3 MVP.
-      const filePaths = new Set<string>();
+    if (!element || element.type === 'folder') {
+      // Build directory tree
+      const dirPath = element ? element.filePath : (this._workspaceRoot || '/');
+      const children = new Map<string, { type: TreeNodeType; fullPath: string }>();
+
       for (const entity of graph.entities.values()) {
         if (entity.kind === 'file') {
-          filePaths.add(entity.filePath);
+          // Check if file is inside this dirPath
+          if (entity.filePath.startsWith(dirPath)) {
+            const relPath = entity.filePath.substring(dirPath.length);
+            const parts = relPath.split(/[/\\]/).filter(Boolean);
+            
+            if (parts.length > 0) {
+              const name = parts[0];
+              const isFolder = parts.length > 1;
+              const fullPath = path.join(dirPath, name);
+              
+              if (!children.has(name)) {
+                children.set(name, { type: isFolder ? 'folder' : 'file', fullPath });
+              }
+            }
+          }
         }
       }
 
-      const fileNodes: EntityTreeNode[] = [];
-      for (const filePath of filePaths) {
-        let label = filePath;
-        if (this._workspaceRoot) {
-          label = path.relative(this._workspaceRoot, filePath);
-        }
-
-        // Get file entity if it exists
-        const fileEntity = graphStore?.getEntitiesByFile(filePath).find(e => e.kind === 'file');
-
-        fileNodes.push(
+      const nodes: EntityTreeNode[] = [];
+      for (const [name, info] of children.entries()) {
+        const fileEntity = info.type === 'file' ? graphStore?.getEntitiesByFile(info.fullPath).find(e => e.kind === 'file') : undefined;
+        nodes.push(
           new EntityTreeNode(
-            label,
-            'file',
-            filePath,
+            name,
+            info.type,
+            info.fullPath,
             fileEntity,
             vscode.TreeItemCollapsibleState.Collapsed,
-            filePath,
+            info.fullPath,
             1
           )
         );
       }
 
-      // Sort alphabetically by label
-      fileNodes.sort((a, b) => a.label.localeCompare(b.label));
-      return fileNodes;
+      // Sort folders first, then alphabetically
+      nodes.sort((a, b) => {
+        if (a.type === 'folder' && b.type !== 'folder') return -1;
+        if (a.type !== 'folder' && b.type === 'folder') return 1;
+        return a.label.localeCompare(b.label);
+      });
+      return nodes;
     } else if (element.type === 'file') {
       // Child level: Entities within a file
       const entities = graphStore?.getEntitiesByFile(element.filePath) || [];

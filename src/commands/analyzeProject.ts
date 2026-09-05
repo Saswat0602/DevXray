@@ -11,7 +11,6 @@ import { GraphStore } from '../core/graphStore';
 import { SidebarProvider } from '../providers/SidebarProvider';
 import { ProjectScanner } from '../analyzer/codebase/projectScanner';
 import { FileIndexer } from '../analyzer/codebase/fileIndexer';
-import { DependencyGraphBuilder } from '../analyzer/codebase/dependencyGraph';
 import { serializeGraph } from '../core/types/WebviewMessage';
 import { CodeScopeError } from '../core/errors/CodeScopeError';
 
@@ -136,16 +135,17 @@ export function registerAnalyzeProjectCommand(
             payload: { percent: 85, label: 'Assembling dependency graph…' },
           });
 
-          const graphResult = DependencyGraphBuilder.build(indexResult.data);
-          if (!graphResult.ok) {
-            throw graphResult.error;
+          // ── Step 4: Store Graph & Update UI ──
+          if (graphStore) {
+            graphStore.setIndexResults(indexResult.data);
+            await graphStore.saveToStorage(context);
           }
 
-          const graph = graphResult.data;
+          const graph = graphStore?.getGraph();
+          if (!graph) {
+             throw new Error('Graph could not be built.');
+          }
           const durationMs = Date.now() - startTime;
-
-          // ── Step 4: Store Graph & Update UI ──
-          graphStore?.setGraph(graph);
 
           const entityCount = graph.entities.size;
           const edgeCount = graph.edges.length;

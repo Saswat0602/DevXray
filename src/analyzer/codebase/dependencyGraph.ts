@@ -219,6 +219,21 @@ export class DependencyGraphBuilder {
       }
     }
 
+    // Alias / fallback match (e.g. @/components/Button -> /abs/path/src/components/Button)
+    if (!specifier.startsWith('.')) {
+      const parts = specifier.split(/[/\\]/);
+      if (parts.length > 1 && (parts[0] === '@' || parts[0] === '~' || parts[0].startsWith('@'))) {
+        const suffix = '/' + parts.slice(1).join('/');
+        for (const [candidate, fullPath] of filesWithoutExt.entries()) {
+          // Compare with normalized paths to avoid cross-platform slash issues
+          const normalizedCandidate = candidate.replace(/\\/g, '/');
+          if (normalizedCandidate.endsWith(suffix)) {
+            return fullPath;
+          }
+        }
+      }
+    }
+
     return undefined;
   }
 

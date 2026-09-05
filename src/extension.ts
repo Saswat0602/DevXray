@@ -22,6 +22,7 @@ import { registerShowEntityDetailsCommand } from './commands/showEntityDetails';
 
 import { GraphStore } from './core/graphStore';
 import { CodebaseTreeProvider } from './providers/CodebaseTreeProvider';
+import { FileWatcherService } from './services/FileWatcherService';
 
 // ── Extension lifecycle ──────────────────────────────────────────────────────
 
@@ -46,10 +47,21 @@ export function activate(context: vscode.ExtensionContext): void {
   // ── 2. Instantiate core services & providers ────────────────────────────
   const graphStore = new GraphStore();
   const sidebarProvider = new SidebarProvider(context.extensionUri);
+  const fileWatcher = new FileWatcherService();
+
+  // Load previous state if available
+  void graphStore.loadFromStorage(context);
+
+  if (vscode.workspace.workspaceFolders?.[0]) {
+    fileWatcher.startWatching(vscode.workspace.workspaceFolders[0].uri.fsPath);
+  }
 
   // ── 3. Register services in Registry ────────────────────────────────────
   Registry.register(GraphStore, graphStore);
   Registry.register(SidebarProvider, sidebarProvider);
+  Registry.register(FileWatcherService, fileWatcher);
+
+  context.subscriptions.push(fileWatcher);
 
   // ── 4. Register VS Code contribution points ──────────────────────────────
 

@@ -283,22 +283,35 @@ export class FileIndexer {
           });
         }
 
-        // ── 8. Call Expressions ─────────────────────────────────────────────
+        // ── 8. Call Expressions (and Dynamic Imports) ───────────────────────
         else if (ts.isCallExpression(node)) {
-          let calleeName = '';
-          if (ts.isIdentifier(node.expression)) {
-            calleeName = node.expression.text;
-          } else if (ts.isPropertyAccessExpression(node.expression)) {
-            calleeName = node.expression.name.text;
-          }
+          // Dynamic Import: import('module')
+          if (node.expression.kind === ts.SyntaxKind.ImportKeyword && node.arguments.length > 0) {
+            const arg = node.arguments[0];
+            if (ts.isStringLiteral(arg)) {
+              const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart());
+              imports.push({
+                moduleSpecifier: arg.text,
+                specifiers: [{ importedName: '*', localName: '*', isNamespace: true }],
+                line: line + 1,
+              });
+            }
+          } else {
+            let calleeName = '';
+            if (ts.isIdentifier(node.expression)) {
+              calleeName = node.expression.text;
+            } else if (ts.isPropertyAccessExpression(node.expression)) {
+              calleeName = node.expression.name.text;
+            }
 
-          if (calleeName) {
-            const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart());
-            calls.push({
-              calleeName,
-              callerEntityId: scopeStack[scopeStack.length - 1],
-              line: line + 1,
-            });
+            if (calleeName) {
+              const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart());
+              calls.push({
+                calleeName,
+                callerEntityId: scopeStack[scopeStack.length - 1],
+                line: line + 1,
+              });
+            }
           }
         }
 
