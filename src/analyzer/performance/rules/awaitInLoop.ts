@@ -27,7 +27,7 @@ export const awaitInLoopRule: Rule = {
 
     if (isLoop(node)) {
       // Find all await expressions inside this loop's body
-      const findAwaits = (child: ts.Node) => {
+      const findAwaits = (child: ts.Node): void => {
         // Stop traversing if we hit a new function boundary
         if (ts.isFunctionDeclaration(child) || ts.isArrowFunction(child) || ts.isMethodDeclaration(child) || ts.isFunctionExpression(child)) {
           return;

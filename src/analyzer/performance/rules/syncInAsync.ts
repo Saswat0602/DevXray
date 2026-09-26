@@ -43,7 +43,7 @@ export const syncInAsyncRule: Rule = {
     const issues: PerformanceIssue[] = [];
 
     if (isAsyncFunction(node)) {
-      const findSyncCalls = (child: ts.Node) => {
+      const findSyncCalls = (child: ts.Node): void => {
         // Stop if we enter another function that is NOT async (if it is async, we'd process it when visit() hits it)
         if (
           ts.isFunctionDeclaration(child) ||

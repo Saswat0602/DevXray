@@ -26,7 +26,7 @@ export const nestedLoopsRule: Rule = {
     const issues: PerformanceIssue[] = [];
 
     if (isLoop(node)) {
-      const findNestedLoops = (child: ts.Node) => {
+      const findNestedLoops = (child: ts.Node): void => {
         // Stop traversing if we hit a new function boundary
         if (ts.isFunctionDeclaration(child) || ts.isArrowFunction(child) || ts.isMethodDeclaration(child) || ts.isFunctionExpression(child)) {
           return;

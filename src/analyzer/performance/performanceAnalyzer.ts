@@ -22,7 +22,7 @@ export class PerformanceAnalyzer {
   public static analyze(sourceFile: ts.SourceFile): PerformanceIssue[] {
     const issues: PerformanceIssue[] = [];
 
-    const visit = (node: ts.Node) => {
+    const visit = (node: ts.Node): void => {
       for (const rule of this._rules) {
         issues.push(...rule.analyze(node, sourceFile));
       }
