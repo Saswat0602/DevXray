@@ -19,9 +19,15 @@ import { registerAnalyzeFileCommand } from './commands/analyzeFile';
 import { registerScanDependenciesCommand } from './commands/scanDependencies';
 import { registerOpenEntityCommand } from './commands/openEntity';
 import { registerShowEntityDetailsCommand } from './commands/showEntityDetails';
+import { registerIgnoreDeadCodeCommand } from './commands/ignoreDeadCode';
+import { registerDeleteDeadCodeCommand } from './commands/deleteDeadCode';
+import { registerUpdatePackageCommand } from './commands/updatePackage';
 
 import { GraphStore } from './core/graphStore';
+import { NpmRegistryService } from './services/NpmRegistryService';
 import { CodebaseTreeProvider } from './providers/CodebaseTreeProvider';
+import { DeadCodeTreeProvider } from './providers/DeadCodeTreeProvider';
+import { DependencyTreeProvider } from './providers/DependencyTreeProvider';
 import { FileWatcherService } from './services/FileWatcherService';
 
 // ── Extension lifecycle ──────────────────────────────────────────────────────
@@ -46,6 +52,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // ── 2. Instantiate core services & providers ────────────────────────────
   const graphStore = new GraphStore();
+  const npmService = new NpmRegistryService();
   const sidebarProvider = new SidebarProvider(context.extensionUri);
   const fileWatcher = new FileWatcherService();
 
@@ -58,6 +65,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // ── 3. Register services in Registry ────────────────────────────────────
   Registry.register(GraphStore, graphStore);
+  Registry.register(NpmRegistryService, npmService);
   Registry.register(SidebarProvider, sidebarProvider);
   Registry.register(FileWatcherService, fileWatcher);
 
@@ -86,13 +94,21 @@ export function activate(context: vscode.ExtensionContext): void {
     registerAnalyzeFileCommand(context),
     registerScanDependenciesCommand(context),
     registerOpenEntityCommand(context),
-    registerShowEntityDetailsCommand(context)
+    registerShowEntityDetailsCommand(context),
+    registerIgnoreDeadCodeCommand(context),
+    registerDeleteDeadCodeCommand(context),
+    registerUpdatePackageCommand(context)
   );
 
-  // Tree View
+  // Tree Views
   const codebaseTreeProvider = new CodebaseTreeProvider();
+  const deadCodeTreeProvider = new DeadCodeTreeProvider();
+  const dependencyTreeProvider = new DependencyTreeProvider();
+  
   context.subscriptions.push(
-    vscode.window.registerTreeDataProvider('devxray.codebaseTree', codebaseTreeProvider)
+    vscode.window.registerTreeDataProvider('devxray.codebaseTree', codebaseTreeProvider),
+    vscode.window.registerTreeDataProvider('devxray.deadCodeTree', deadCodeTreeProvider),
+    vscode.window.registerTreeDataProvider('devxray.dependencyTree', dependencyTreeProvider)
   );
 
   Logger.info('extension', 'DevXray activated successfully');

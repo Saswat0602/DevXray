@@ -60,6 +60,24 @@
         "title": "Show Details",
         "category": "DevXray",
         "icon": "$(info)"
+      },
+      {
+        "command": "devxray.ignoreDeadCode",
+        "title": "Ignore Dead Code",
+        "category": "DevXray",
+        "icon": "$(eye-closed)"
+      },
+      {
+        "command": "devxray.deleteDeadCode",
+        "title": "Delete Dead Code",
+        "category": "DevXray",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "devxray.updatePackage",
+        "title": "Update Package",
+        "category": "DevXray",
+        "icon": "$(cloud-download)"
       }
     ],
     "viewsContainers": {
@@ -85,6 +103,18 @@
           "name": "Codebase Explorer",
           "icon": "$(type-hierarchy)",
           "contextualTitle": "Codebase Explorer"
+        },
+        {
+          "id": "devxray.deadCodeTree",
+          "name": "Dead Code Hunter",
+          "icon": "$(search-stop)",
+          "contextualTitle": "Dead Code Hunter"
+        },
+        {
+          "id": "devxray.dependencyTree",
+          "name": "Dependency Detective",
+          "icon": "$(versions)",
+          "contextualTitle": "Dependency Detective"
         }
       ]
     },
@@ -112,6 +142,36 @@
           "command": "devxray.showEntityDetails",
           "when": "view == devxray.codebaseTree && viewItem == devxrayEntity",
           "group": "devxray"
+        },
+        {
+          "command": "devxray.ignoreDeadCode",
+          "when": "view == devxray.deadCodeTree && viewItem == devxrayDeadCode",
+          "group": "inline"
+        },
+        {
+          "command": "devxray.deleteDeadCode",
+          "when": "view == devxray.deadCodeTree && viewItem == devxrayDeadCode",
+          "group": "inline"
+        },
+        {
+          "command": "devxray.ignoreDeadCode",
+          "when": "view == devxray.deadCodeTree && viewItem == devxrayDeadCode",
+          "group": "devxray@1"
+        },
+        {
+          "command": "devxray.deleteDeadCode",
+          "when": "view == devxray.deadCodeTree && viewItem == devxrayDeadCode",
+          "group": "devxray@2"
+        },
+        {
+          "command": "devxray.updatePackage",
+          "when": "view == devxray.dependencyTree && viewItem == devxrayOutdatedPackage",
+          "group": "inline"
+        },
+        {
+          "command": "devxray.updatePackage",
+          "when": "view == devxray.dependencyTree && viewItem == devxrayOutdatedPackage",
+          "group": "devxray"
         }
       ]
     },
@@ -136,6 +196,18 @@
           "minimum": 10,
           "maximum": 10000,
           "description": "Maximum file size (in KB) to include in analysis."
+        },
+        "devxray.entryPoints": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["**/extension.ts", "**/index.ts", "**/index.js", "**/main.ts", "**/main.js"],
+          "description": "Glob patterns for entry point files. These will not be flagged as dead code even if they have no inbound dependencies."
+        },
+        "devxray.ignoredDeadCode": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "List of Entity IDs explicitly ignored by the Dead Code Hunter."
         },
         "devxray.enablePerformanceAnalysis": {
           "type": "boolean",
@@ -165,7 +237,7 @@
     "pretest": "npm run compile && npm run lint",
     "test": "node ./out/test/runTest.js",
     "test:unit": "npm run compile && node ./out/test/runUnitTests.js",
-    "reinstall": "npm run compile && vsce package --allow-missing-repository --baseContentUrl https://github.com/saswat/devxray --out devxray-latest.vsix && code --install-extension devxray-latest.vsix"
+    "reinstall": "npm run compile && vsce package --allow-missing-repository --baseContentUrl https://github.com/saswat/devxray --out devxray-latest.vsix && '/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code' --install-extension devxray-latest.vsix --force"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
