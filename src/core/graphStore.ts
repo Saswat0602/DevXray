@@ -30,6 +30,15 @@ export class GraphStore {
     return this._graph;
   }
 
+  /** Gets the total number of performance anti-patterns discovered across all files */
+  public getTotalPerformanceIssues(): number {
+    let total = 0;
+    for (const r of this._indexResults.values()) {
+      total += (r.performanceIssueCount || 0);
+    }
+    return total;
+  }
+
   /** Set a new codebase graph and update internal lookup indices */
   public setGraph(graph: CodebaseGraph): void {
     this._graph = graph;

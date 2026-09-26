@@ -33,6 +33,15 @@ export type ExtensionToWebviewMessage =
   | {
       type: 'GRAPH_UPDATED';
       payload: SerializedCodebaseGraph;
+    }
+  | {
+      type: 'UPDATE_HEALTH_SCORE';
+      payload: {
+        overall: number;
+        performance: number;
+        deadCode: number;
+        dependencies: number;
+      };
     };
 
 // ── Webview → Extension Host ─────────────────────────────────────────────────

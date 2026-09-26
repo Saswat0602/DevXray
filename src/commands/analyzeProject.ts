@@ -11,7 +11,10 @@ import { GraphStore } from '../core/graphStore';
 import { SidebarProvider } from '../providers/SidebarProvider';
 import { ProjectScanner } from '../analyzer/codebase/projectScanner';
 import { FileIndexer } from '../analyzer/codebase/fileIndexer';
+import { ProjectHealthService } from '../analyzer/dashboard/ProjectHealthService';
+import { DependencyAnalyzer } from '../analyzer/features/dependencyAnalyzer';
 import { serializeGraph } from '../core/types/WebviewMessage';
+import { NpmRegistryService } from '../services/NpmRegistryService';
 import { CodeScopeError } from '../core/errors/CodeScopeError';
 
 /**
@@ -164,6 +167,19 @@ export function registerAnalyzeProjectCommand(
             type: 'GRAPH_UPDATED',
             payload: serializeGraph(graph),
           });
+
+          // Compute and send Health Score
+          if (graphStore) {
+            const npmService = Registry.has(NpmRegistryService) ? Registry.get(NpmRegistryService) : undefined;
+            if (npmService) {
+              const deps = await DependencyAnalyzer.analyze(workspaceRoot, graphStore, npmService);
+              const scores = ProjectHealthService.computeScores(graphStore, deps);
+              sidebarProvider?.postMessage({
+                type: 'UPDATE_HEALTH_SCORE',
+                payload: scores,
+              });
+            }
+          }
 
           progress.report({ increment: 20, message: 'Done!' });
 

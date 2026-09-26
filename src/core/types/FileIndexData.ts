@@ -64,4 +64,6 @@ export interface FileIndexResult {
   readonly calls: ReadonlyArray<CallRecord>;
   /** All class extends / implements clauses */
   readonly heritage: ReadonlyArray<HeritageRecord>;
+  /** Total count of performance anti-patterns discovered during indexing */
+  readonly performanceIssueCount?: number;
 }

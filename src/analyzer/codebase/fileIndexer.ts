@@ -18,6 +18,7 @@ import {
   HeritageRecord,
 } from '../../core/types/FileIndexData';
 import { CodeScopeError } from '../../core/errors/CodeScopeError';
+import { PerformanceAnalyzer } from '../performance/performanceAnalyzer';
 
 export class FileIndexer {
   /**
@@ -57,6 +58,8 @@ export class FileIndexer {
       const imports: ImportRecord[] = [];
       const calls: CallRecord[] = [];
       const heritage: HeritageRecord[] = [];
+      
+      const perfIssues = PerformanceAnalyzer.analyze(sourceFile);
 
       // Stack to track current function/method scope for call attribution
       const scopeStack: string[] = [fileEntity.id];
@@ -327,6 +330,7 @@ export class FileIndexer {
         imports,
         calls,
         heritage,
+        performanceIssueCount: perfIssues.length,
       });
     } catch (parseError) {
       return err(CodeScopeError.from(parseError, 'PARSE_ERROR'));

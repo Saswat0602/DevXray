@@ -484,14 +484,21 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           const edges = m.payload.edgeCount;
           setState('ready', files + ' files · ' + entities + ' entities · ' + edges + ' deps');
           
-          if (files > 0) {
-            // Update score card with baseline health assessment
-            document.getElementById('overall').innerHTML = '88 <sub>/ 100</sub>';
-            setBar('bar-perf', 'val-perf', 92);
-            setBar('bar-dead', 'val-dead', 85);
-            setBar('bar-deps', 'val-deps', Math.min(100, Math.max(60, Math.round(edges * 1.5))));
+            if (files > 0) {
+              // We'll update the score card later when UPDATE_HEALTH_SCORE arrives
+              document.getElementById('overall').innerHTML = '... <sub>/ 100</sub>';
+              setBar('bar-perf', 'val-perf', 0);
+              setBar('bar-dead', 'val-dead', 0);
+              setBar('bar-deps', 'val-deps', 0);
+            }
+            break;
           }
-          break;
+        case 'UPDATE_HEALTH_SCORE': {
+            document.getElementById('overall').innerHTML = m.payload.overall + ' <sub>/ 100</sub>';
+            setBar('bar-perf', 'val-perf', m.payload.performance);
+            setBar('bar-dead', 'val-dead', m.payload.deadCode);
+            setBar('bar-deps', 'val-deps', m.payload.dependencies);
+            break;
         }
         case 'SCAN_ERROR':
           setState('', 'Error: ' + m.payload.message);
