@@ -92,10 +92,10 @@
         "icon": "$(close)"
       },
       {
-        "command": "devxray.showVariableTimeline",
-        "title": "Show Timeline",
+        "command": "devxray.askAi",
+        "title": "Ask AI",
         "category": "DevXray",
-        "icon": "$(history)"
+        "icon": "$(sparkle)"
       }
     ],
     "viewsContainers": {
@@ -273,6 +273,27 @@
           "enum": ["debug", "info", "warn", "error"],
           "default": "info",
           "description": "Log level for the DevXray output channel."
+        },
+        "devxray.ai.provider": {
+          "type": "string",
+          "enum": ["openrouter", "local"],
+          "default": "openrouter",
+          "description": "The AI provider to use for Ask AI."
+        },
+        "devxray.ai.model": {
+          "type": "string",
+          "default": "openai/gpt-4o-mini",
+          "description": "The model to use (e.g., openai/gpt-4o-mini or llama3)."
+        },
+        "devxray.ai.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Your OpenRouter API Key (if using openrouter)."
+        },
+        "devxray.ai.localEndpoint": {
+          "type": "string",
+          "default": "http://127.0.0.1:11434/v1/chat/completions",
+          "description": "The endpoint URL for your local model API (must be OpenAI compatible)."
         }
       }
     }

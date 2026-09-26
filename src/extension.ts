@@ -25,6 +25,7 @@ import { registerUpdatePackageCommand } from './commands/updatePackage';
 import { registerTrackVariableCommand } from './commands/trackVariable';
 import { registerUntrackVariableCommand } from './commands/untrackVariable';
 import { registerShowVariableTimelineCommand } from './commands/showVariableTimeline';
+import { registerAskAiCommand } from './commands/askAi';
 
 import { GraphStore } from './core/graphStore';
 import { NpmRegistryService } from './services/NpmRegistryService';
@@ -114,7 +115,8 @@ export function activate(context: vscode.ExtensionContext): void {
     registerUpdatePackageCommand(context),
     registerTrackVariableCommand(context),
     registerUntrackVariableCommand(context),
-    registerShowVariableTimelineCommand(context)
+    registerShowVariableTimelineCommand(context),
+    registerAskAiCommand(context)
   );
 
   // Tree Views
