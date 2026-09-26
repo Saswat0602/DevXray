@@ -28,6 +28,8 @@ import { NpmRegistryService } from './services/NpmRegistryService';
 import { CodebaseTreeProvider } from './providers/CodebaseTreeProvider';
 import { DeadCodeTreeProvider } from './providers/DeadCodeTreeProvider';
 import { DependencyTreeProvider } from './providers/DependencyTreeProvider';
+import { PerformanceCodeLensProvider } from './providers/PerformanceCodeLensProvider';
+import { PerformanceDiagnostics } from './providers/PerformanceDiagnostics';
 import { FileWatcherService } from './services/FileWatcherService';
 
 // ── Extension lifecycle ──────────────────────────────────────────────────────
@@ -109,6 +111,35 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.window.registerTreeDataProvider('devxray.codebaseTree', codebaseTreeProvider),
     vscode.window.registerTreeDataProvider('devxray.deadCodeTree', deadCodeTreeProvider),
     vscode.window.registerTreeDataProvider('devxray.dependencyTree', dependencyTreeProvider)
+  );
+
+  // Performance Analyzer
+  PerformanceDiagnostics.initialize(context);
+  const perfCodeLensProvider = new PerformanceCodeLensProvider();
+  context.subscriptions.push(
+    vscode.languages.registerCodeLensProvider(
+      [
+        { language: 'typescript' },
+        { language: 'javascript' },
+        { language: 'typescriptreact' },
+        { language: 'javascriptreact' }
+      ],
+      perfCodeLensProvider
+    )
+  );
+
+  // Initial analysis for the currently open file
+  if (vscode.window.activeTextEditor) {
+    PerformanceDiagnostics.analyzeDocument(vscode.window.activeTextEditor.document);
+  }
+
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeTextDocument(event => {
+      PerformanceDiagnostics.analyzeDocument(event.document);
+    }),
+    vscode.workspace.onDidOpenTextDocument(document => {
+      PerformanceDiagnostics.analyzeDocument(document);
+    })
   );
 
   Logger.info('extension', 'DevXray activated successfully');
