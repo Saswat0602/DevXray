@@ -4,6 +4,11 @@
   "description": "AI-powered codebase health and intelligence for VS Code. Explore, analyze, and understand your project.",
   "version": "0.1.0",
   "publisher": "saswat",
+  "icon": "icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/saswat/devxray"
+  },
   "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"
@@ -144,10 +149,18 @@
     },
     "menus": {
       "commandPalette": [
-        { "command": "devxray.analyzeProject" },
-        { "command": "devxray.analyzeFile" },
-        { "command": "devxray.scanDependencies" },
-        { "command": "devxray.openDashboard" }
+        {
+          "command": "devxray.analyzeProject"
+        },
+        {
+          "command": "devxray.analyzeFile"
+        },
+        {
+          "command": "devxray.scanDependencies"
+        },
+        {
+          "command": "devxray.openDashboard"
+        }
       ],
       "editor/context": [
         {
@@ -229,7 +242,9 @@
       "properties": {
         "devxray.excludePatterns": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "default": [
             "**/node_modules/**",
             "**/dist/**",
@@ -248,13 +263,23 @@
         },
         "devxray.entryPoints": {
           "type": "array",
-          "items": { "type": "string" },
-          "default": ["**/extension.ts", "**/index.ts", "**/index.js", "**/main.ts", "**/main.js"],
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/extension.ts",
+            "**/index.ts",
+            "**/index.js",
+            "**/main.ts",
+            "**/main.js"
+          ],
           "description": "Glob patterns for entry point files. These will not be flagged as dead code even if they have no inbound dependencies."
         },
         "devxray.ignoredDeadCode": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "default": [],
           "description": "List of Entity IDs explicitly ignored by the Dead Code Hunter."
         },
@@ -270,13 +295,21 @@
         },
         "devxray.logLevel": {
           "type": "string",
-          "enum": ["debug", "info", "warn", "error"],
+          "enum": [
+            "debug",
+            "info",
+            "warn",
+            "error"
+          ],
           "default": "info",
           "description": "Log level for the DevXray output channel."
         },
         "devxray.ai.provider": {
           "type": "string",
-          "enum": ["openrouter", "local"],
+          "enum": [
+            "openrouter",
+            "local"
+          ],
           "default": "openrouter",
           "description": "The AI provider to use for Ask AI."
         },
@@ -310,12 +343,16 @@
     "reinstall": "npm run compile && vsce package --allow-missing-repository --baseContentUrl https://github.com/saswat/devxray --out devxray-latest.vsix && '/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code' --install-extension devxray-latest.vsix --force"
   },
   "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^20.0.0",
     "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
-    "@vscode/test-electron": "^2.3.0",
+    "@vscode/test-electron": "^2.5.2",
     "eslint": "^8.57.0",
+    "glob": "^13.0.6",
+    "mocha": "^12.0.2",
     "typescript": "^5.4.0"
   },
   "dependencies": {
