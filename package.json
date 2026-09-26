@@ -78,6 +78,24 @@
         "title": "Update Package",
         "category": "DevXray",
         "icon": "$(cloud-download)"
+      },
+      {
+        "command": "devxray.trackVariable",
+        "title": "Track Variable",
+        "category": "DevXray",
+        "icon": "$(debug-alt)"
+      },
+      {
+        "command": "devxray.untrackVariable",
+        "title": "Untrack Variable",
+        "category": "DevXray",
+        "icon": "$(close)"
+      },
+      {
+        "command": "devxray.showVariableTimeline",
+        "title": "Show Timeline",
+        "category": "DevXray",
+        "icon": "$(history)"
       }
     ],
     "viewsContainers": {
@@ -115,6 +133,12 @@
           "name": "Dependency Detective",
           "icon": "$(versions)",
           "contextualTitle": "Dependency Detective"
+        },
+        {
+          "id": "devxray.variableTree",
+          "name": "Variable Tracker",
+          "icon": "$(debug-alt)",
+          "contextualTitle": "Variable Tracker"
         }
       ]
     },
@@ -129,7 +153,12 @@
         {
           "command": "devxray.analyzeFile",
           "when": "editorIsOpen",
-          "group": "devxray"
+          "group": "devxray@1"
+        },
+        {
+          "command": "devxray.trackVariable",
+          "when": "editorIsOpen",
+          "group": "devxray@2"
         }
       ],
       "view/item/context": [
@@ -172,6 +201,26 @@
           "command": "devxray.updatePackage",
           "when": "view == devxray.dependencyTree && viewItem == devxrayOutdatedPackage",
           "group": "devxray"
+        },
+        {
+          "command": "devxray.showVariableTimeline",
+          "when": "view == devxray.variableTree && viewItem == devxrayTrackedVariable",
+          "group": "inline"
+        },
+        {
+          "command": "devxray.untrackVariable",
+          "when": "view == devxray.variableTree && viewItem == devxrayTrackedVariable",
+          "group": "inline"
+        },
+        {
+          "command": "devxray.showVariableTimeline",
+          "when": "view == devxray.variableTree && viewItem == devxrayTrackedVariable",
+          "group": "devxray@1"
+        },
+        {
+          "command": "devxray.untrackVariable",
+          "when": "view == devxray.variableTree && viewItem == devxrayTrackedVariable",
+          "group": "devxray@2"
         }
       ]
     },

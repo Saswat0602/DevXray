@@ -22,12 +22,17 @@ import { registerShowEntityDetailsCommand } from './commands/showEntityDetails';
 import { registerIgnoreDeadCodeCommand } from './commands/ignoreDeadCode';
 import { registerDeleteDeadCodeCommand } from './commands/deleteDeadCode';
 import { registerUpdatePackageCommand } from './commands/updatePackage';
+import { registerTrackVariableCommand } from './commands/trackVariable';
+import { registerUntrackVariableCommand } from './commands/untrackVariable';
+import { registerShowVariableTimelineCommand } from './commands/showVariableTimeline';
 
 import { GraphStore } from './core/graphStore';
 import { NpmRegistryService } from './services/NpmRegistryService';
+import { VariableTracker } from './analyzer/debugger/variableTracker';
 import { CodebaseTreeProvider } from './providers/CodebaseTreeProvider';
 import { DeadCodeTreeProvider } from './providers/DeadCodeTreeProvider';
 import { DependencyTreeProvider } from './providers/DependencyTreeProvider';
+import { VariableTreeProvider } from './providers/VariableTreeProvider';
 import { PerformanceCodeLensProvider } from './providers/PerformanceCodeLensProvider';
 import { PerformanceDiagnostics } from './providers/PerformanceDiagnostics';
 import { FileWatcherService } from './services/FileWatcherService';
@@ -55,6 +60,7 @@ export function activate(context: vscode.ExtensionContext): void {
   // ── 2. Instantiate core services & providers ────────────────────────────
   const graphStore = new GraphStore();
   const npmService = new NpmRegistryService();
+  const variableTracker = new VariableTracker();
   const sidebarProvider = new SidebarProvider(context.extensionUri);
   const fileWatcher = new FileWatcherService();
 
@@ -68,10 +74,16 @@ export function activate(context: vscode.ExtensionContext): void {
   // ── 3. Register services in Registry ────────────────────────────────────
   Registry.register(GraphStore, graphStore);
   Registry.register(NpmRegistryService, npmService);
+  Registry.register(VariableTracker, variableTracker);
   Registry.register(SidebarProvider, sidebarProvider);
   Registry.register(FileWatcherService, fileWatcher);
 
   context.subscriptions.push(fileWatcher);
+  
+  // Register Debug Adapter Tracker Factory for all debuggers
+  context.subscriptions.push(
+    vscode.debug.registerDebugAdapterTrackerFactory('*', variableTracker)
+  );
 
   // ── 4. Register VS Code contribution points ──────────────────────────────
 
@@ -99,18 +111,23 @@ export function activate(context: vscode.ExtensionContext): void {
     registerShowEntityDetailsCommand(context),
     registerIgnoreDeadCodeCommand(context),
     registerDeleteDeadCodeCommand(context),
-    registerUpdatePackageCommand(context)
+    registerUpdatePackageCommand(context),
+    registerTrackVariableCommand(context),
+    registerUntrackVariableCommand(context),
+    registerShowVariableTimelineCommand(context)
   );
 
   // Tree Views
   const codebaseTreeProvider = new CodebaseTreeProvider();
   const deadCodeTreeProvider = new DeadCodeTreeProvider();
   const dependencyTreeProvider = new DependencyTreeProvider();
+  const variableTreeProvider = new VariableTreeProvider();
   
   context.subscriptions.push(
     vscode.window.registerTreeDataProvider('devxray.codebaseTree', codebaseTreeProvider),
     vscode.window.registerTreeDataProvider('devxray.deadCodeTree', deadCodeTreeProvider),
-    vscode.window.registerTreeDataProvider('devxray.dependencyTree', dependencyTreeProvider)
+    vscode.window.registerTreeDataProvider('devxray.dependencyTree', dependencyTreeProvider),
+    vscode.window.registerTreeDataProvider('devxray.variableTree', variableTreeProvider)
   );
 
   // Performance Analyzer
