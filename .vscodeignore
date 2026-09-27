@@ -1,0 +1,16 @@
+.vscode/**
+.vscode-test/**
+out/test/**
+src/**
+.gitignore
+.eslintrc.json
+tsconfig.json
+webpack.config.js
+PRD.md
+AGENT.md
+task.md
+walkthrough.md
+implementation_plan.md
+icon_*.jpg
+**/*.map
+.github/**
