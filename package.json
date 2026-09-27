@@ -3,7 +3,7 @@
   "displayName": "DevXray",
   "description": "AI-powered codebase health and intelligence for VS Code. Explore, analyze, and understand your project.",
   "version": "0.1.0",
-  "publisher": "saswat",
+  "publisher": "SaswatRanjan",
   "icon": "icon.png",
   "repository": {
     "type": "git",
